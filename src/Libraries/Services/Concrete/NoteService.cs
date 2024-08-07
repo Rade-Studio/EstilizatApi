@@ -1,4 +1,5 @@
-﻿using Data.Repos;
+﻿using System;
+using Data.Repos;
 using Data.UnitOfWork;
 using Models.DbEntities;
 using Services.Interfaces;
@@ -23,7 +24,7 @@ namespace Services.Concrete
             _unitOfWork = unitOfWork;
         }
 
-        public bool DeleteNote(int id)
+        public bool DeleteNote(Guid id)
         {
             Note note = _repository.Find(x => x.Id == id && x.OwnerEmail.Equals(_userEmail));
             if (note != null)
@@ -47,7 +48,7 @@ namespace Services.Concrete
             return await _repository.FindAllAsync(x => x.OwnerEmail.Equals(_userEmail));
         }
 
-        public Note GetNoteById(int id)
+        public Note GetNoteById(Guid id)
         {
             return _repository.Find(x => x.Id == id && x.OwnerEmail.Equals(_userEmail));
         }

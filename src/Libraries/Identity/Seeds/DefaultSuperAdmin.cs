@@ -1,4 +1,5 @@
-﻿using Identity.Models;
+﻿using System.Collections.Generic;
+using Identity.Models;
 using Microsoft.AspNetCore.Identity;
 using Models.Enums;
 using System.Linq;
@@ -18,7 +19,15 @@ namespace Identity.Seeds
                 FirstName = "Sinan",
                 LastName = "Tok",
                 EmailConfirmed = true,
-                PhoneNumberConfirmed = true
+                PhoneNumberConfirmed = true,
+                Preferences =
+                [
+                    new Preference
+                    {
+                        Type = "Theme",
+                        Value = "Light"
+                    }
+                ]
             };
             if (userManager.Users.All(u => u.Id != defaultUser.Id))
             {
@@ -28,7 +37,7 @@ namespace Identity.Seeds
                     await userManager.CreateAsync(defaultUser, "123Pa$$word!");
                     await userManager.AddToRoleAsync(defaultUser, Roles.Basic.ToString());
                     await userManager.AddToRoleAsync(defaultUser, Roles.Moderator.ToString());
-                    await userManager.AddToRoleAsync(defaultUser, Roles.Admin.ToString());
+                    await userManager.AddToRoleAsync(defaultUser, Roles.Shop.ToString());
                     await userManager.AddToRoleAsync(defaultUser, Roles.SuperAdmin.ToString());
                 }
             }

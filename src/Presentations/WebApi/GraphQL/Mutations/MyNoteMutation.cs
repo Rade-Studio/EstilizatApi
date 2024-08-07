@@ -1,4 +1,5 @@
-﻿using GraphQL.Types;
+﻿using System;
+using GraphQL.Types;
 using Models.DbEntities;
 using Services.Interfaces;
 using WebApi.GraphQL.Types.Note;
@@ -26,7 +27,7 @@ namespace WebApi.GraphQL.Mutations
                     new QueryArgument<NonNullGraphType<IntGraphType>> { Name = "id" }),
                 resolve: context =>
                 {
-                    int id = context.GetArgument<int>("id");
+                    var id = context.GetArgument<Guid>("id");
                     bool res = noteService.DeleteNote(id);
                     if (res)
                         return "Note deleted";

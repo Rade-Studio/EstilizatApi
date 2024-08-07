@@ -66,6 +66,8 @@ namespace Data.Repos
 
         public T Insert(T entity)
         {
+            entity.Id = Guid.NewGuid();
+            
             _context.Set<T>().Add(entity);
             _context.SaveChanges();
             return entity;

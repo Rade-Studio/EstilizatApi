@@ -9,5 +9,8 @@ namespace Models.DTOs.Account
         public string LastName { get; set; }
         public string Email { get; set; }
         public List<string> Roles { get; set; }
+        public string ProfileImage { get; set; }
+        public string Status { get; set; }
+        public List<PreferenceDto> Preferences { get; set; } = [];
     }
 }

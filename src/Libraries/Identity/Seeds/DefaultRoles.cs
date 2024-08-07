@@ -18,7 +18,7 @@ namespace Identity.Seeds
             });
             await roleManager.CreateAsync(new ApplicationRole()
             {
-                Name = Roles.Admin.ToString(),
+                Name = Roles.Shop.ToString(),
                 CreatedDate = DateTime.Now
             });
             await roleManager.CreateAsync(new ApplicationRole()

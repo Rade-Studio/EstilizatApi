@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
 using System.Collections.Generic;
-using System.Text;
-using Models.DTOs.Account;
 
 namespace Identity.Models
 {
@@ -10,6 +7,11 @@ namespace Identity.Models
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string ProfileImage { get; set; }
+        public string Status { get; set; }
+        public List<Preference> Preferences { get; set; } = [];
+        
         public ICollection<ApplicationUserRole> UserRoles { get; set; }
     }
+
 }

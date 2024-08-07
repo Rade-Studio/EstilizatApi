@@ -1,4 +1,5 @@
-﻿using Caching;
+﻿using System;
+using Caching;
 using GraphQL.Types;
 using Services.Interfaces;
 using WebApi.GraphQL.Types.Note;
@@ -24,7 +25,7 @@ namespace WebApi.GraphQL.Queries
                 arguments: new QueryArguments(new QueryArgument<IntGraphType> { Name = "id" }),
                 resolve: context =>
                 {
-                    int noteId = context.GetArgument<int>("id");
+                    var noteId = context.GetArgument<Guid>("id");
                     return noteService.GetNoteById(noteId);
                 });
 

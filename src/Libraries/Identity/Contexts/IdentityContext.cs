@@ -20,6 +20,8 @@ namespace Identity.Contexts
 
             builder.HasDefaultSchema("Identity");
             builder.Entity<ApplicationUser>(entity => { entity.ToTable(name: "User"); });
+            builder.Entity<ApplicationUser>()
+                .OwnsMany(preferences => preferences.Preferences, builderIn => { builderIn.ToJson(); });
 
             builder.Entity<ApplicationRole>(entity => { entity.ToTable(name: "Role"); });
 
