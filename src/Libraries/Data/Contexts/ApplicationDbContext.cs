@@ -6,12 +6,8 @@ using System.Reflection;
 
 namespace Data.Contexts
 {
-    public class ApplicationDbContext : DbContext, IDbContext
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options), IDbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             RegisterEntityMapping(modelBuilder);
