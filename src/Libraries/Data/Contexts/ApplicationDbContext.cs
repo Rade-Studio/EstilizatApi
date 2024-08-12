@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Reflection;
+using Models.DbEntities;
 
 namespace Data.Contexts
 {
@@ -11,6 +12,23 @@ namespace Data.Contexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             RegisterEntityMapping(modelBuilder);
+            
+            // adding composite key for EmployeeSkill table
+            modelBuilder.Entity<EmployeeSkill>()
+                .HasKey(p => new { p.EmployeeId, p.ShopServiceId });
+            
+            modelBuilder.Entity<EmployeeSkill>()
+                .HasOne(p => p.Employee)
+                .WithMany(p => p.Services)
+                .HasForeignKey(p => p.EmployeeId)
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<EmployeeSkill>()
+                .HasOne(p => p.Service)
+                .WithMany(p => p.Employees)
+                .HasForeignKey(p => p.ShopServiceId)
+                .OnDelete(DeleteBehavior.NoAction);
+            
             base.OnModelCreating(modelBuilder);
         }
 

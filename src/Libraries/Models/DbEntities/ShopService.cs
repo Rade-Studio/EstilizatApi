@@ -19,4 +19,7 @@ public class ShopService : BaseEntity
     
     public ServiceCategory ServiceCategory { get; set; }
     public Shop Shop { get; set; }
+    public ICollection<Appointment> Appointments { get; set; }
+    public ICollection<WaitList> WaitLists { get; set; }
+    public ICollection<EmployeeSkill> Employees { get; set; }
 }

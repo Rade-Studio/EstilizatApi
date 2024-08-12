@@ -44,5 +44,25 @@ public class ShopMap : MappingEntityTypeConfiguration<Shop>
             .WithOne(p => p.Shop)
             .HasForeignKey(p => p.ShopId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(p => p.Appointments)
+            .WithOne(p => p.Shop)
+            .HasForeignKey(p => p.ShopId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(p => p.Employees)
+            .WithOne(p => p.Shop)
+            .HasForeignKey(p => p.ShopId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(p => p.WaitLists)
+            .WithOne(p => p.Shop)
+            .HasForeignKey(p => p.ShopId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.HasMany(p => p.Reviews)
+            .WithOne(p => p.Shop)
+            .HasForeignKey(p => p.ShopId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
