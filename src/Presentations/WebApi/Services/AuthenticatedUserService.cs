@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using Microsoft.AspNetCore.Http;
 using Services.Interfaces;
 using System.Security.Claims;
 
@@ -9,9 +10,13 @@ namespace WebApi.Services
         public AuthenticatedUserService(IHttpContextAccessor httpContextAccessor)
         {
             UserEmail = httpContextAccessor.HttpContext?.User?.FindFirstValue(
-                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress");
+                ClaimTypes.Email);
+
+            UserId = new Guid(httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                              string.Empty);
         }
 
         public string UserEmail { get; }
+        public Guid UserId { get; }
     }
 }

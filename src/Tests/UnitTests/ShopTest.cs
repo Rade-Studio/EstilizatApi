@@ -5,7 +5,7 @@ using UnitTests.core.Enums;
 
 namespace UnitTests;
 
-public class ShopTest() : BaseTest(TypeControllerTesting.Shop)
+public class ShopTest() : BaseTest(TypeControllerTesting.Shops)
 {
     [Fact]
     public async void Should_return_200_ok_when_fetch_all_shops()

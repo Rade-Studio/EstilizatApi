@@ -15,7 +15,7 @@ namespace UnitTests.core;
 
 public class ApiFactory(TypeControllerTesting controller) : WebApplicationFactory<IApiAssemblyMarker>
 {
-    private readonly string _controller = controller.ToString();
+    private readonly string _controller = controller.ToString().ToLower();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -50,14 +50,14 @@ public class ApiFactory(TypeControllerTesting controller) : WebApplicationFactor
         return httpClient;
     }
 
-    public HttpClient GetClientWithAuthenticated()
+    public HttpClient GetClientWithAuthenticated(string? email = null, string? password = null)
     {
         var httpClient = CreateClient();
 
         var response = CreateClient().PostAsJsonAsync("/api/Account/authenticate", new
         {
-            email = "superadmin@gmail.com",
-            password = "123Pa$$word!"
+            email = email ?? "superadmin@gmail.com",
+            password = password ?? "123Pa$$word!"
         });
 
         var result = response.Result.Content.ReadAsStringAsync().Result;
