@@ -3,5 +3,6 @@
 public enum TypeControllerTesting
 {
     Account,
-    Note
+    Note,
+    Shop,
 }
