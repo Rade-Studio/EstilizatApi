@@ -43,7 +43,8 @@ namespace WebApi
             services.AddGraphQLServices(Configuration);
             services.AddRedis(Configuration);
             services.AddScoped<IAuthenticatedUserService, AuthenticatedUserService>();
-            services.AddMappingProfiles(Configuration);
+            services.AddMappingProfiles();
+            services.AddValidators();
             services.AddCustomSwagger(Configuration);
 
             services.AddControllers();

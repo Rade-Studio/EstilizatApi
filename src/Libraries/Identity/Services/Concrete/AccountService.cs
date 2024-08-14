@@ -31,11 +31,13 @@ namespace Identity.Services.Concrete
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly JWTSettings _jwtSettings;
+        private readonly MailSettings _mailSettings;
         private readonly IEmailService _emailService;
 
         public AccountService(UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager,
             IOptions<JWTSettings> jwtSettings,
+            IOptions<MailSettings> mailSettings,
             SignInManager<ApplicationUser> signInManager,
             IEmailService emailService)
         {
@@ -43,6 +45,7 @@ namespace Identity.Services.Concrete
             _roleManager = roleManager;
             _signInManager = signInManager;
             _jwtSettings = jwtSettings.Value;
+            _mailSettings = mailSettings.Value;
             _emailService = emailService;
         }
 
@@ -171,14 +174,7 @@ namespace Identity.Services.Concrete
 
         public async Task<BaseResponse<string>> RegisterAsync(RegisterRequest request, string uri)
         {
-            ApplicationUser findUser = await _userManager.FindByNameAsync(request.UserName);
-            if (findUser != null)
-            {
-                throw new ApiException($"Username '{request.UserName}' is already taken.")
-                    { StatusCode = (int)HttpStatusCode.BadRequest };
-            }
-
-            findUser = await _userManager.FindByEmailAsync(request.Email);
+            ApplicationUser findUser = await _userManager.FindByEmailAsync(request.Email);
             if (findUser != null)
             {
                 throw new ApiException($"Email {request.Email} is already registered.")
@@ -190,7 +186,7 @@ namespace Identity.Services.Concrete
                 Email = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                UserName = request.UserName
+                UserName = Guid.NewGuid().ToString(),
             };
             var result = await _userManager.CreateAsync(newUser, request.Password);
             if (result.Succeeded)
@@ -301,7 +297,7 @@ namespace Identity.Services.Concrete
 
             await _emailService.SendAsync(new EmailRequest()
             {
-                From = "sinantok@outlook.com",
+                From = _mailSettings.EmailFrom,
                 To = newUser.Email,
                 Body = $"Please confirm your account by visiting this URL {verificationUri}",
                 Subject = "Confirm Registration"

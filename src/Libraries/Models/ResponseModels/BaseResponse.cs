@@ -8,13 +8,13 @@ namespace Models.ResponseModels
         {
         }
 
-        public BaseResponse(T data, string message = null)
+        public BaseResponse(T data, string message = null, bool succeeded = true)
         {
             Message = message;
             Data = data;
-            Succeeded = true;
+            Succeeded = succeeded;
         }
-
+        
         public BaseResponse(string message)
         {
             Message = message;
