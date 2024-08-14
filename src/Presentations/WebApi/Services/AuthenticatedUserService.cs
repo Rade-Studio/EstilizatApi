@@ -12,11 +12,10 @@ namespace WebApi.Services
             UserEmail = httpContextAccessor.HttpContext?.User?.FindFirstValue(
                 ClaimTypes.Email);
 
-            UserId = new Guid(httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier) ??
-                              string.Empty);
+            UserId = Convert.ToInt32(httpContextAccessor.HttpContext?.User?.FindFirstValue("uid"));
         }
 
         public string UserEmail { get; }
-        public Guid UserId { get; }
+        public int UserId { get; }
     }
 }

@@ -57,6 +57,8 @@ namespace Core
             services.AddTransient<INoteService, NoteService>();
 
             services.AddTransient<ILoginLogService, LoginLogService>();
+
+            services.AddTransient<IShopService, ShopService>();
         }
 
         public static void AddCustomSwagger(this IServiceCollection services, IConfiguration config)
