@@ -15,7 +15,6 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Services.Interfaces;
 using WebApi.Extensions;
-using WebApi.GraphQL;
 using WebApi.Helpers;
 using WebApi.Services;
 
@@ -40,7 +39,6 @@ namespace WebApi
             services.AddApplicationSqlServer(Configuration);
             services.AddRepoServices(Configuration);
             services.AddAppServices(Configuration);
-            services.AddGraphQLServices(Configuration);
             services.AddRedis(Configuration);
             services.AddScoped<IAuthenticatedUserService, AuthenticatedUserService>();
             services.AddMappingProfiles();
@@ -70,6 +68,7 @@ namespace WebApi
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("OnlyAdmins", policy => policy.RequireRole("SuperAdmin", "Admin"));
+                options.AddPolicy("ShopOwner", policy => policy.RequireRole("Shopper"));
             });
         }
 

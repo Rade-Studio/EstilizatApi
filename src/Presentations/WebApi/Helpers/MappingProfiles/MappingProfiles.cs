@@ -4,7 +4,7 @@ using Identity.Models;
 using Models.DTOs.Account;
 using Models.DTOs.Log;
 
-namespace WebApi.Helpers
+namespace WebApi.Helpers.MappingProfiles
 {
     public class MappingProfiles : Profile
     {

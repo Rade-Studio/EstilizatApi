@@ -39,19 +39,37 @@ namespace Data.Repos
             return _context.SaveChanges();
         }
 
-        public T Find(Expression<Func<T, bool>> match)
+        public T Find(Expression<Func<T, bool>> match, params Expression<Func<T, object>>[] includes)
         {
-            return _context.Set<T>().FirstOrDefault(match);
+            IQueryable<T> query = _context.Set<T>();
+            if (includes != null && includes.Any())
+            {
+                query = includes.Aggregate(query, (current, include) => current.Include(include));
+            }
+            
+            return query.FirstOrDefault(match);
         }
 
-        public List<T> FindAll(Expression<Func<T, bool>> match)
+        public List<T> FindAll(Expression<Func<T, bool>> match, params Expression<Func<T, object>>[] includes)
         {
-            return _context.Set<T>().Where(match).ToList();
+            IQueryable<T> query = _context.Set<T>();
+            if (includes != null && includes.Any())
+            {
+                query = includes.Aggregate(query, (current, include) => current.Include(include));
+            }
+            
+            return query.Where(match).ToList();
         }
 
-        public async Task<List<T>> FindAllAsync(Expression<Func<T, bool>> match)
+        public async Task<List<T>> FindAllAsync(Expression<Func<T, bool>> match, params Expression<Func<T, object>>[] includes)
         {
-            return await _context.Set<T>().Where(match).ToListAsync();
+            IQueryable<T> query = _context.Set<T>();
+            if (includes != null && includes.Any())
+            {
+                query = includes.Aggregate(query, (current, include) => current.Include(include));
+            }
+            
+            return await query.Where(match).ToListAsync();
         }
 
         public List<T> GetAll()
@@ -67,6 +85,8 @@ namespace Data.Repos
         public T Insert(T entity)
         {
             entity.Id = Guid.NewGuid();
+            entity.CreateUTC = DateTime.Now;
+            entity.LastUpdateUTC = DateTime.Now;
             
             _context.Set<T>().Add(entity);
             _context.SaveChanges();
@@ -79,6 +99,7 @@ namespace Data.Repos
                 return null;
             _context.Set<T>().Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
+            entity.LastUpdateUTC = DateTime.Now;
             _context.SaveChanges();
             return entity;
         }

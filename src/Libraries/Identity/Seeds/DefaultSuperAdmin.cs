@@ -38,7 +38,7 @@ namespace Identity.Seeds
                     await userManager.CreateAsync(defaultUser, "P@ssw0rd");
                     await userManager.AddToRoleAsync(defaultUser, Roles.Basic.ToString());
                     await userManager.AddToRoleAsync(defaultUser, Roles.Moderator.ToString());
-                    await userManager.AddToRoleAsync(defaultUser, Roles.Shop.ToString());
+                    await userManager.AddToRoleAsync(defaultUser, Roles.Shopper.ToString());
                     await userManager.AddToRoleAsync(defaultUser, Roles.SuperAdmin.ToString());
                 }
             }

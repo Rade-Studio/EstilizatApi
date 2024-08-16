@@ -1,9 +1,8 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
-using WebApi.Helpers;
+using WebApi.Helpers.MappingProfiles;
 using WebApi.Helpers.Validators;
 using WebApi.Middlewares;
 

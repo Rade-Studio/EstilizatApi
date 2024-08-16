@@ -15,17 +15,19 @@ namespace UnitTests.core;
 
 public class ApiFactory(TypeControllerTesting controller) : WebApplicationFactory<IApiAssemblyMarker>
 {
-    private readonly string _controller = controller.ToString().ToLower();
+    private readonly string _controller = controller.ToString();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureTestServices(
+        builder
+            .UseEnvironment("Development")
+            .ConfigureTestServices(
             services =>
             {
                 var dbContextDescriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>)
                 );
-
+                
                 services.Remove(dbContextDescriptor);
 
                 var dbConnectionDescriptor = services.SingleOrDefault(
@@ -38,8 +40,6 @@ public class ApiFactory(TypeControllerTesting controller) : WebApplicationFactor
                     options.UseInMemoryDatabase("ApplicationDb");
                 });
             });
-
-        builder.UseEnvironment("Development");
     }
 
     public HttpClient GetClient()
@@ -56,8 +56,8 @@ public class ApiFactory(TypeControllerTesting controller) : WebApplicationFactor
 
         var response = CreateClient().PostAsJsonAsync("/api/Account/authenticate", new
         {
-            email = email ?? "superadmin@gmail.com",
-            password = password ?? "123Pa$$word!"
+            email = email ?? "prueba@prueba.com",
+            password = password ?? "P@ssw0rd"
         });
 
         var result = response.Result.Content.ReadAsStringAsync().Result;

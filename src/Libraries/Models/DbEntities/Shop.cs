@@ -26,10 +26,10 @@ public class Shop: BaseEntity
     public List<GalleryShop> Gallery { get; set; } = [];
     public List<SocialMedia> SocialMedia { get; set; } = [];
     
-    public ICollection<ShopService> ShopServices { get; set; }
-    public ICollection<ShopSetting> ShopSettings { get; set; }
-    public ICollection<Appointment> Appointments { get; set; }
-    public ICollection<Employee> Employees { get; set; }
-    public ICollection<WaitList> WaitLists { get; set; }
-    public ICollection<ShopReview> Reviews { get; set; }
+    public ICollection<ShopService> ShopServices { get; set; } = [];
+    public ICollection<ShopSetting> ShopSettings { get; set; } = [];
+    public ICollection<Appointment> Appointments { get; set; } = [];
+    public ICollection<Employee> Employees { get; set; } = [];
+    public ICollection<WaitList> WaitLists { get; set; } = [];
+    public ICollection<ShopReview> Reviews { get; set; } = [];
 }

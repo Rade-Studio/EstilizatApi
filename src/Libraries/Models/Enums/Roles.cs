@@ -3,7 +3,7 @@
     public enum Roles
     {
         SuperAdmin,
-        Shop,
+        Shopper,
         Moderator,
         Basic
     }

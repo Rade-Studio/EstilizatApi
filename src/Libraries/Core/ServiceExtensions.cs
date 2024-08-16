@@ -54,8 +54,6 @@ namespace Core
 
         public static void AddAppServices(this IServiceCollection services, IConfiguration config)
         {
-            services.AddTransient<INoteService, NoteService>();
-
             services.AddTransient<ILoginLogService, LoginLogService>();
 
             services.AddTransient<IShopService, ShopService>();

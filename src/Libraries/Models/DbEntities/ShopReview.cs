@@ -4,7 +4,7 @@ namespace Models.DbEntities;
 
 public class ShopReview : BaseEntity
 {
-    public Guid CustomerId { get; set; }
+    public int CustomerId { get; set; }
     public Guid ShopId { get; set; }
     public int Rating { get; set; }
     public string Review { get; set; }

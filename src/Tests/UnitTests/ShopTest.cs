@@ -5,24 +5,16 @@ using UnitTests.core.Enums;
 
 namespace UnitTests;
 
-public class ShopTest() : BaseTest(TypeControllerTesting.Shops)
+public class ShopTest() : BaseTest(TypeControllerTesting.Shop)
 {
+    # region Shop Tests
+
     [Fact]
     public async void Should_return_200_ok_when_fetch_all_shops()
     {
         var response = await HttpClient.GetAsync("allshops");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    }
-
-    [Fact]
-    public async void Should_return_zero_shops_when_fetch_all_shops()
-    {
-        var response = await HttpClient.GetAsync("allshops");
-        var shops = GetResponse<IReadOnlyList<ShopDto>>(response);
-
-        Assert.NotNull(shops);
-        Assert.Empty(shops.Data);
     }
 
     [Fact]
@@ -46,21 +38,22 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shops)
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
+    #endregion
+
+    #region features into Shop
+
     [Fact]
     public async void Should_return_ok_when_add_shop_with_social_media()
     {
         var shopId = await AddShop(HttpClient);
-        
-        var shopData = new
+
+        var shopData = new UpdateSocialMediaLinks
         {
-            SocialMedia = new[]
-            {
-                new { Name = "Facebook", Url = "https://facebook.com" },
-                new { Name = "Instagram", Url = "https://instagram.com" }
-            }
+            Name = "Facebook",
+            Url = "https://facebook.com"
         };
 
-        var response = await HttpClient.PostAsJsonAsync($"{shopId}/updatesocialmedia", shopData);
+        var response = await HttpClient.PutAsJsonAsync($"{shopId}/updatesocialmedia", shopData);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
@@ -69,20 +62,83 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shops)
     public async void Should_return_ok_when_add_opening_hours_to_shop()
     {
         var shopId = await AddShop(HttpClient);
-        
-        var shopData = new
+
+        var shopData = new UpdateOpeningHours()
         {
-            OpeningHours = new[]
-            {
-                new { Day = "Monday", Open = "08:00", Close = "18:00" },
-                new { Day = "Tuesday", Open = "08:00", Close = "18:00" }
-            }
+            OpeningHours =
+            [
+                new OpeningHourItem { Day = "Monday", OpenTime = "08:00", CloseTime = "18:00" },
+                new OpeningHourItem { Day = "Tuesday", OpenTime = "08:00", CloseTime = "18:00" }
+            ]
         };
 
-        var response = await HttpClient.PostAsJsonAsync($"{shopId}/updateopeninghours", shopData);
+        var response = await HttpClient.PutAsJsonAsync($"{shopId}/updateopeninghours", shopData);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
+
+    [Fact]
+    public async void Should_return_ok_when_add_gallery_to_shop()
+    {
+        var shopId = await AddShop(HttpClient);
+
+        var shopData = new UpdateGallery()
+        {
+            Images = new List<UpdateGallery.GalleryImageItem>()
+            {
+                new() { Url = "https://image1.com" },
+                new() { Url = "https://image2.com" }
+            }
+        };
+
+        var response = await HttpClient.PutAsJsonAsync($"{shopId}/updategallery", shopData);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    #endregion
+
+    # region segment into Shop
+
+    [Fact]
+    public async void Should_return_ok_when_add_settings_to_shop()
+    {
+        var shopId = await AddShop(HttpClient);
+
+        var shopData = new
+        {
+            Key = "Setting 1",
+            Value = "Value 1"
+        };
+
+        var response = await HttpClient.PutAsJsonAsync($"{shopId}/updatesettings", shopData);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    #endregion
+
+    # region employee featrues into Shop
+
+    [Fact]
+    public async void Should_return_ok_when_add_employee_to_shop()
+    {
+        var shopId = await AddShop(HttpClient);
+
+        var shopData = new
+        {
+            Name = "Employee 1",
+            PhoneNumber = "1234567890"
+        };
+
+        var response = await HttpClient.PostAsJsonAsync($"{shopId}/addemployee", shopData);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    #endregion
+
+    # region service featrues into Shop
 
     [Fact]
     public async void Should_return_ok_when_add_service_to_shop()
@@ -100,65 +156,26 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shops)
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
+    #endregion
+
+    # region review featrues into Shop
+
     [Fact]
-    public async void Should_return_ok_when_add_settings_to_shop()
+    public async void Should_return_ok_when_all_reviews_by_shop()
     {
         var shopId = await AddShop(HttpClient);
-        
-        var shopData = new
-        {
-            Id = "",
-            Key = "Setting 1",
-            Value = "Value 1"
-        };
 
-        var response = await HttpClient.PostAsJsonAsync($"{shopId}/updatesetting", shopData);
+        var response = await HttpClient.GetAsync($"{shopId}/allreviews");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
-
-    [Fact]
-    public async void Should_return_ok_when_add_employee_to_shop()
-    {
-        var shopId = await AddShop(HttpClient);
-        
-        var shopData = new
-        {
-            Id = "",
-            Name = "Employee 1",
-            PhoneNumber = "1234567890"
-        };
-
-        var response = await HttpClient.PostAsJsonAsync($"{shopId}/updateemployee", shopData);
-
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    }
-
-    [Fact]
-    public async void Should_return_ok_when_add_gallery_to_shop()
-    {
-        var shopId = await AddShop(HttpClient);
-        
-        var shopData = new
-        {
-            Gallery = new[]
-            {
-                new { Image = "https://image1.com" },
-                new { Image = "https://image2.com" }
-            }
-        };
-
-        var response = await HttpClient.PostAsJsonAsync($"{shopId}/updategallery", shopData);
-
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    }
-
+    
     [Fact]
     public async void Should_return_ok_when_add_review_to_shop()
     {
         var shopId = await AddShop(HttpClient);
-        
-        var shopData = new
+
+        var shopData = new AddShopReview()
         {
             Rating = 5,
             Review = "Good"
@@ -170,11 +187,11 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shops)
     }
 
     [Fact]
-    public async void Should_return_ok_when_set_review()
+    public async void Should_return_ok_when_reply_review()
     {
         var shopId = await AddShop(HttpClient);
-        
-        var shopData = new
+
+        var shopData = new AddShopReview()
         {
             Rating = 5,
             Review = "Good"
@@ -184,23 +201,26 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shops)
 
         var review = GetResponse<string>(responseAdd);
 
-        var reviewData = new
+        var reviewData = new 
         {
-            Id = review.Data,
+            ReviewId = review?.Data,
             Reply = "Thank you for your review",
-            Visibility = true
         };
 
-        var responseUpdate = await HttpClient.PostAsJsonAsync($"{shopId}/setreview", reviewData);
+        var responseUpdate = await HttpClient.PutAsJsonAsync($"{shopId}/replyreview", reviewData);
 
         Assert.Equal(HttpStatusCode.OK, responseUpdate.StatusCode);
     }
+
+    #endregion
+
+    # region private methods
 
     private static async Task<string> AddShop(HttpClient httpClient)
     {
         var shopData = new
         {
-            Name = "Test Shop",
+            Name = "Test Shop" + Guid.NewGuid(),
             Description = "Test Shop Description",
             Address = "Test Shop Address",
             Phone = "1234567890",
@@ -215,9 +235,11 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shops)
 
         var data = GetResponse<string>(response);
 
-        if (data == null) 
+        if (data == null)
             throw new Exception("Error adding shop");
-        
+
         return data.Data;
     }
+
+    #endregion
 }

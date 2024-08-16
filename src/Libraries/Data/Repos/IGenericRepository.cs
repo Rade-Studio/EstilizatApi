@@ -10,9 +10,9 @@ namespace Data.Repos
     {
         List<T> GetAll();
         T GetById(int id);
-        T Find(Expression<Func<T, bool>> match);
-        List<T> FindAll(Expression<Func<T, bool>> match);
-        Task<List<T>> FindAllAsync(Expression<Func<T, bool>> match);
+        T Find(Expression<Func<T, bool>> match, params Expression<Func<T, object>>[] includes);
+        List<T> FindAll(Expression<Func<T, bool>> match, params Expression<Func<T, object>>[] includes);
+        Task<List<T>> FindAllAsync(Expression<Func<T, bool>> match, params Expression<Func<T, object>>[] includes);
         T Insert(T entity);
         bool BulkInsert(List<T> entities);
         T Update(T entity);

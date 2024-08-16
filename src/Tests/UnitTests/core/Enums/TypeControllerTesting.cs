@@ -4,5 +4,5 @@ public enum TypeControllerTesting
 {
     Account,
     Note,
-    Shops,
+    Shop,
 }
