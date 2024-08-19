@@ -1,11 +1,11 @@
-﻿using Core.Exceptions;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Models.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Models.Exceptions;
 
 namespace WebApi.Middlewares
 {

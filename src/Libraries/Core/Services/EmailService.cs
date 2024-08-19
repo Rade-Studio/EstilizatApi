@@ -7,8 +7,8 @@ using Models.Settings;
 using System;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
-using Core.Exceptions;
 using Microsoft.Extensions.Options;
+using Models.Exceptions;
 
 namespace Core.Services
 {

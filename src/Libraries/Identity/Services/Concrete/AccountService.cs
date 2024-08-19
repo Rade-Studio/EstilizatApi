@@ -1,5 +1,4 @@
-﻿using Core.Exceptions;
-using Core.Helpers;
+﻿using Core.Helpers;
 using Core.Interfaces;
 using Identity.Models;
 using Identity.Services.Interfaces;
@@ -22,6 +21,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Models.Exceptions;
 
 namespace Identity.Services.Concrete
 {

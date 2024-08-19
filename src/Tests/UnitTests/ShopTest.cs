@@ -118,10 +118,10 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shop)
 
     #endregion
 
-    # region employee featrues into Shop
+    # region employee features into Shop
 
     [Fact]
-    public async void Should_return_ok_when_add_employee_to_shop()
+    public async void Should_return_ok_when_add_employee_to_shop_without_services()
     {
         var shopId = await AddShop(HttpClient);
 
@@ -135,7 +135,6 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shop)
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
-
     #endregion
 
     # region service featrues into Shop

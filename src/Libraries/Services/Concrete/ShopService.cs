@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Net;
 using Data.Repos;
 using Models.DbEntities;
 using Models.DbEntities.JsonEntities;
 using Models.DTOs.Shop;
 using Models.Enums;
-using Models.ResponseModels;
+using Models.Exceptions;
 using Services.Interfaces;
 
 namespace Services.Concrete;
@@ -16,15 +16,17 @@ public class ShopService : IShopService
 {
     private readonly IGenericRepository<Shop> _shopRepository;
 
-    // private readonly IGenericRepository<ShopService> _shopServiceRepository;
+    private readonly IGenericRepository<Models.DbEntities.ShopService> _shopServiceRepository;
     private readonly IGenericRepository<Employee> _employeeRepository;
     private readonly IAuthenticatedUserService _authenticatedUserService;
 
     public ShopService(IGenericRepository<Shop> shopRepository,
-        IGenericRepository<Employee> employeeRepository, IAuthenticatedUserService authenticatedUserService)
+        IGenericRepository<Employee> employeeRepository,
+        IAuthenticatedUserService authenticatedUserService,
+        IGenericRepository<Models.DbEntities.ShopService> shopServiceRepository)
     {
         _shopRepository = shopRepository;
-        // _shopServiceRepository = shopServiceRepository;
+        _shopServiceRepository = shopServiceRepository;
         _employeeRepository = employeeRepository;
         _authenticatedUserService = authenticatedUserService;
     }
@@ -34,7 +36,8 @@ public class ShopService : IShopService
         Shop shop = _shopRepository.Find(x => x.Name == registerShop.Name);
         if (shop != null)
         {
-            throw new ApplicationException($"Shop already exists with name {registerShop.Name}");
+            throw new ApiException($"Shop already exists with name {registerShop.Name}")
+                { StatusCode = (int)HttpStatusCode.Conflict };
         }
 
         shop = new Shop
@@ -62,13 +65,14 @@ public class ShopService : IShopService
         var shopExists = _shopRepository.Find(x => x.Name == updateShop.Name && x.Id != shopId);
         if (shopExists != null)
         {
-            throw new ApplicationException($"Shop already exists with name {updateShop.Name}");
+            throw new ApiException($"Shop already exists with name {updateShop.Name}")
+                { StatusCode = (int)HttpStatusCode.Conflict };
         }
 
         Shop shop = _shopRepository.Find(x => x.Id == shopId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         shop.Name = updateShop.Name;
@@ -92,7 +96,7 @@ public class ShopService : IShopService
         var shop = _shopRepository.Find(x => x.Id == id && x.OwnerId == _authenticatedUserService.UserId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         return shop;
@@ -103,7 +107,7 @@ public class ShopService : IShopService
         Shop shop = _shopRepository.Find(x => x.OwnerId == userId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         return shop;
@@ -114,7 +118,7 @@ public class ShopService : IShopService
         Shop shop = _shopRepository.Find(x => x.OwnerId == _authenticatedUserService.UserId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         return shop;
@@ -140,7 +144,7 @@ public class ShopService : IShopService
         Shop shop = _shopRepository.Find(x => x.Id == shopId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = 404 };
         }
 
         _shopRepository.Delete(shop);
@@ -163,7 +167,7 @@ public class ShopService : IShopService
         var shop = _shopRepository.Find(x => x.Id == shopId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         // Todo: Add shopServiceRepository
@@ -171,25 +175,28 @@ public class ShopService : IShopService
         var service = new Models.DbEntities.ShopService();
         if (service == null)
         {
-            throw new ApplicationException("Service not found");
+            throw new ApiException("Service not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         // Verificar si hay empleados asociados al servicio
         if (service.Employees.Any())
         {
-            throw new ApplicationException("Service has employees associated with it");
+            throw new ApiException("Service has employees associated with it")
+                { StatusCode = (int)HttpStatusCode.BadRequest };
         }
 
         // Verificar si hay pedidos asociados al servicio
         if (service.Appointments.Any())
         {
-            throw new ApplicationException("Service has orders associated with it");
+            throw new ApiException("Service has orders associated with it")
+                { StatusCode = (int)HttpStatusCode.BadRequest };
         }
 
         // Verificar si hay pedidos asociados en la lista de espera al servicio
         if (service.WaitLists.Any())
         {
-            throw new ApplicationException("Service has wait lists associated with it");
+            throw new ApiException("Service has wait lists associated with it")
+                { StatusCode = (int)HttpStatusCode.BadRequest };
         }
 
         shop.ShopServices.Remove(service);
@@ -197,8 +204,7 @@ public class ShopService : IShopService
         _shopRepository.Update(shop);
 
         // Eliminar el servicio
-        // Todo: Add shopServiceRepository
-        // _shopServiceRepository.Delete(service);
+        _shopServiceRepository.Delete(service);
 
         return "Service removed successfully";
     }
@@ -208,7 +214,7 @@ public class ShopService : IShopService
         var shop = _shopRepository.Find(x => x.Id == shopId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         var employee = new Employee()
@@ -220,22 +226,21 @@ public class ShopService : IShopService
         };
 
         // Verificar si hay servicios para agregar
-        // Todo: Add shopServiceRepository
-        // if (registerEmployee.Services != null && registerEmployee.Services.Any())
-        // {
-        //     var serviceIds = registerEmployee.Services.Select(s => s.Id).ToList();
-        //     var servicesToAdd = await _shopServiceRepository.GetServicesByIdsAsync(serviceIds);
-        //
-        //     // Añadir los servicios encontrados, ignorando los que no existen
-        //     foreach (var serviceToAdd in servicesToAdd)
-        //     {
-        //         employee.Services.Add(new EmployeeSkill
-        //         {
-        //             ShopServiceId = serviceToAdd.Id,
-        //             Service = serviceToAdd
-        //         });
-        //     }
-        // }
+        if (registerEmployee.Services != null && registerEmployee.Services.Any())
+        {
+            var serviceIds = registerEmployee.Services.Select(s => s.Id).ToList();
+            var servicesToAdd = _shopServiceRepository.FindAll(x => serviceIds.Contains(x.Id));
+
+            // Añadir los servicios encontrados, ignorando los que no existen
+            foreach (var serviceToAdd in servicesToAdd)
+            {
+                employee.Services.Add(new EmployeeSkill
+                {
+                    ShopServiceId = serviceToAdd.Id,
+                    Service = serviceToAdd
+                });
+            }
+        }
 
         shop.Employees.Add(employee);
 
@@ -249,13 +254,13 @@ public class ShopService : IShopService
         var shop = _shopRepository.Find(x => x.Id == shopId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         var employee = shop.Employees.First(x => x.Id == updateEmployee.EmployeeId);
         if (employee == null)
         {
-            throw new ApplicationException("Employee not found");
+            throw new ApiException("Employee not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         employee.Name = updateEmployee.Name;
@@ -263,34 +268,31 @@ public class ShopService : IShopService
         employee.Status = updateEmployee.Status;
 
         // Verificar si hay servicios para agregar o actualizar
-        // Todo: Add shopServiceRepository
-        // if (updateEmployee.Services != null && updateEmployee.Services.Any())
-        // {
-        //     var serviceIds = updateEmployee.Services.Select(s => s.Id).ToList();
-        //     var servicesToAdd = _shopServiceRepository.GetServicesByIdsAsync(serviceIds);
-        //     var servicesToRemove = employee.Services
-        //         .Where(s => serviceIds.All(id => id != s.ShopServiceId)).ToList();
-        //
-        //     // Añadir los servicios encontrados, ignorando los que no existen
-        //     foreach (var serviceToAdd in servicesToAdd)
-        //     {
-        //         // Verificar si el servicio ya existe
-        //         var serviceExists = employee.Services.Any(s => s.ShopServiceId == serviceToAdd.Id);
-        //         if (!serviceExists)
-        //         {
-        //             employee.Services.Add(new EmployeeSkill
-        //             {
-        //                 ShopServiceId = serviceToAdd.Id,
-        //                 Service = serviceToAdd
-        //             });
-        //         }
-        //     }
-        //
-        //     foreach (var serviceToRemove in servicesToRemove)
-        //     {
-        //         employee.Services.Remove(serviceToRemove);
-        //     }
-        // }
+        if (updateEmployee.Services != null && updateEmployee.Services.Any())
+        {
+            var serviceIds = updateEmployee.Services.Select(s => s.Id).ToList();
+            var servicesToAdd = _shopServiceRepository.FindAll(x => serviceIds.Contains(x.Id));
+            var servicesToRemove = employee.Services
+                .Where(s => serviceIds.All(id => id != s.ShopServiceId)).ToList();
+
+            // Añadir los servicios encontrados, ignorando los que no existen
+            foreach (var serviceToAdd in from serviceToAdd in servicesToAdd
+                     let serviceExists = employee.Services.Any(s => s.ShopServiceId == serviceToAdd.Id)
+                     where !serviceExists
+                     select serviceToAdd)
+            {
+                employee.Services.Add(new EmployeeSkill
+                {
+                    ShopServiceId = serviceToAdd.Id,
+                    Service = serviceToAdd
+                });
+            }
+
+            foreach (var serviceToRemove in servicesToRemove)
+            {
+                employee.Services.Remove(serviceToRemove);
+            }
+        }
 
 
         _shopRepository.Update(shop);
@@ -304,13 +306,13 @@ public class ShopService : IShopService
         var shop = _shopRepository.Find(x => x.Id == shopId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         var employee = _employeeRepository.Find(x => x.Id == employeeId);
         if (employee == null)
         {
-            throw new ApplicationException("Employee not found");
+            throw new ApiException("Employee not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         shop.Employees.Remove(employee);
@@ -325,7 +327,7 @@ public class ShopService : IShopService
         var shop = _shopRepository.Find(x => x.Id == shopId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         if (shop.ShopSettings.Any(x => x.Key == updateSettings.Key))
@@ -355,7 +357,7 @@ public class ShopService : IShopService
         var shop = _shopRepository.Find(x => x.Id == shopId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         var socialMedia = new SocialMedia(links.Name, links.Url);
@@ -376,7 +378,7 @@ public class ShopService : IShopService
         var shop = _shopRepository.Find(x => x.Id == shopId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         var openingHours = updateOpeningHours.OpeningHours.Select(openingHour =>
@@ -393,7 +395,7 @@ public class ShopService : IShopService
         var shop = _shopRepository.Find(x => x.Id == shopId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         var galleryImages = gallery.Images.Select(image =>
@@ -410,13 +412,13 @@ public class ShopService : IShopService
         var shop = _shopRepository.Find(x => x.Id == shopId, x => x.Reviews);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         var reviewToUpdate = shop.Reviews.FirstOrDefault(x => x.Id == review.ReviewId);
         if (reviewToUpdate == null)
         {
-            throw new ApplicationException("Review not found");
+            throw new ApiException("Review not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         reviewToUpdate.Reply = review.Reply;
@@ -432,9 +434,9 @@ public class ShopService : IShopService
         var shop = _shopRepository.Find(x => x.Id == shopId, x => x.Reviews);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
-        
+
         return (IReadOnlyList<ShopReview>)shop.Reviews;
     }
 
@@ -443,9 +445,9 @@ public class ShopService : IShopService
         var shop = _shopRepository.Find(x => x.Id == id, x => x.Reviews);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
-        
+
         return (IReadOnlyList<ShopReview>)shop.Reviews.Skip((page - 1) * pageSize).Take(pageSize);
     }
 
@@ -454,7 +456,7 @@ public class ShopService : IShopService
         var shop = _shopRepository.Find(x => x.Id == shopId);
         if (shop == null)
         {
-            throw new ApplicationException("Shop not found");
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
         var reviewToAdd = new ShopReview()

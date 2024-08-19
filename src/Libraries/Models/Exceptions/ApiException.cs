@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 
-namespace Core.Exceptions
+namespace Models.Exceptions
 {
     public class ApiException : Exception
     {
