@@ -1,5 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
+using System.Text;
+using Microsoft.AspNetCore.Http;
 using Models.DTOs.Shop;
 using UnitTests.core.Enums;
 
@@ -49,8 +51,11 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shop)
 
         var shopData = new UpdateSocialMediaLinks
         {
-            Name = "Facebook",
-            Url = "https://facebook.com"
+            SocialMediaLinks =
+            [
+                new SocialMediaLink { Name = "Facebook", Url = "https://facebook.com" },
+                new SocialMediaLink { Name = "Twitter", Url = "https://twitter.com" }
+            ]
         };
 
         var response = await HttpClient.PutAsJsonAsync($"{shopId}/updatesocialmedia", shopData);
@@ -82,16 +87,34 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shop)
     {
         var shopId = await AddShop(HttpClient);
 
-        var shopData = new UpdateGallery()
-        {
-            Images = new List<UpdateGallery.GalleryImageItem>()
-            {
-                new() { Url = "https://image1.com" },
-                new() { Url = "https://image2.com" }
-            }
-        };
+        var fileContent = new ByteArrayContent("Fake Image Content"u8.ToArray());
+        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
+        
+        var fileContent2 = new ByteArrayContent("Fake Image Content 2"u8.ToArray());
+        fileContent2.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
 
-        var response = await HttpClient.PutAsJsonAsync($"{shopId}/updategallery", shopData);
+        using var multipartContent = new MultipartFormDataContent();
+        multipartContent.Add(fileContent, "files", "test.jpg");
+        multipartContent.Add(fileContent2, "files", "test2.jpg");
+
+        var response = await HttpClient.PutAsync($"{shopId}/updategallery", multipartContent);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+
+    [Fact]
+    public async Task Should_return_ok_when_add_profile_picture_to_shop()
+    {
+        var shopId = await AddShop(HttpClient);
+
+        var fileContent = new ByteArrayContent("Fake Image Content"u8.ToArray());
+        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
+
+        using var multipartContent = new MultipartFormDataContent();
+        multipartContent.Add(fileContent, "image", "test.jpg");
+
+        var response = await HttpClient.PutAsync($"{shopId}/updateprofilepicture", multipartContent);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
@@ -135,25 +158,6 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shop)
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
-    #endregion
-
-    # region service featrues into Shop
-
-    [Fact]
-    public async void Should_return_ok_when_add_service_to_shop()
-    {
-        var shopId = await AddShop(HttpClient);
-        var shopData = new
-        {
-            Name = "Service 1",
-            Description = "Service 1 Description",
-            Price = 100
-        };
-
-        var response = await HttpClient.PostAsJsonAsync($"{shopId}/addservice", shopData);
-
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    }
 
     #endregion
 
@@ -168,7 +172,7 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shop)
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
-    
+
     [Fact]
     public async void Should_return_ok_when_add_review_to_shop()
     {
@@ -200,7 +204,7 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shop)
 
         var review = GetResponse<string>(responseAdd);
 
-        var reviewData = new 
+        var reviewData = new
         {
             ReviewId = review?.Data,
             Reply = "Thank you for your review",
@@ -215,7 +219,7 @@ public class ShopTest() : BaseTest(TypeControllerTesting.Shop)
 
     # region private methods
 
-    private static async Task<string> AddShop(HttpClient httpClient)
+    public static async Task<string> AddShop(HttpClient httpClient)
     {
         var shopData = new
         {

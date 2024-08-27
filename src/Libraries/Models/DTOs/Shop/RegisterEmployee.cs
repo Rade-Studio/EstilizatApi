@@ -7,5 +7,5 @@ public class RegisterEmployee
 {
     public string Phone { get; set; }
     public string Name { get; set; }
-    public List<AddShopServiceToEmployee> Services { get; set; }
+    public List<Guid> Services { get; set; }
 }

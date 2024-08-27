@@ -10,5 +10,5 @@ public class UpdateEmployee
     public string Name { get; set; }
     public string PhoneNumber { get; set; }
     public EmployeeStatus Status { get; set; }
-    public List<AddShopServiceToEmployee> Services { get; set; }
+    public List<Guid> Services { get; set; }
 }

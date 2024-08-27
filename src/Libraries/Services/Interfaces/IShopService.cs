@@ -17,9 +17,6 @@ public interface IShopService
    IReadOnlyList<Shop> GetShopsByCategory(string category);
    IReadOnlyList<Shop> GetAllShops();
    string DeleteShop(Guid shopId);
-   string AddShopService(Guid shopId, AddShopServiceToEmployee serviceToEmployee);
-   string UpdateShopService(Guid shopId, AddShopServiceToEmployee serviceToEmployee);
-   string RemoveShopService(Guid shopId, Guid serviceId);
    string AddEmployee(Guid shopId, RegisterEmployee registerEmployee);
    string UpdateEmployee(Guid shopId, UpdateEmployee updateEmployee);
    string RemoveEmployee(Guid shopId, Guid employeeId);

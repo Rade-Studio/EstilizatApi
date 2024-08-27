@@ -33,7 +33,7 @@ public class ShopService : IShopService
 
     public string RegisterShop(RegisterShop registerShop)
     {
-        Shop shop = _shopRepository.Find(x => x.Name == registerShop.Name);
+        var shop = _shopRepository.Find(x => x.Name == registerShop.Name);
         if (shop != null)
         {
             throw new ApiException($"Shop already exists with name {registerShop.Name}")
@@ -69,7 +69,7 @@ public class ShopService : IShopService
                 { StatusCode = (int)HttpStatusCode.Conflict };
         }
 
-        Shop shop = _shopRepository.Find(x => x.Id == shopId);
+        var shop = _shopRepository.Find(x => x.Id == shopId);
         if (shop == null)
         {
             throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
@@ -104,7 +104,7 @@ public class ShopService : IShopService
 
     public Shop GetShopByUserId(int userId)
     {
-        Shop shop = _shopRepository.Find(x => x.OwnerId == userId);
+        var shop = _shopRepository.Find(x => x.OwnerId == userId);
         if (shop == null)
         {
             throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
@@ -115,7 +115,7 @@ public class ShopService : IShopService
 
     public Shop GetShopByUserAuthenticated()
     {
-        Shop shop = _shopRepository.Find(x => x.OwnerId == _authenticatedUserService.UserId);
+        var shop = _shopRepository.Find(x => x.OwnerId == _authenticatedUserService.UserId);
         if (shop == null)
         {
             throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
@@ -134,14 +134,14 @@ public class ShopService : IShopService
 
     public IReadOnlyList<Shop> GetAllShops()
     {
-        List<Shop> shops = _shopRepository.GetAll();
+        var shops = _shopRepository.GetAll();
 
         return shops;
     }
 
     public string DeleteShop(Guid shopId)
     {
-        Shop shop = _shopRepository.Find(x => x.Id == shopId);
+        var shop = _shopRepository.Find(x => x.Id == shopId);
         if (shop == null)
         {
             throw new ApiException("Shop not found") { StatusCode = 404 };
@@ -150,63 +150,6 @@ public class ShopService : IShopService
         _shopRepository.Delete(shop);
 
         return "Shop deleted successfully";
-    }
-
-    public string AddShopService(Guid shopId, AddShopServiceToEmployee serviceToEmployee)
-    {
-        throw new NotImplementedException();
-    }
-
-    public string UpdateShopService(Guid shopId, AddShopServiceToEmployee serviceToEmployee)
-    {
-        throw new NotImplementedException();
-    }
-
-    public string RemoveShopService(Guid shopId, Guid serviceId)
-    {
-        var shop = _shopRepository.Find(x => x.Id == shopId);
-        if (shop == null)
-        {
-            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
-        }
-
-        // Todo: Add shopServiceRepository
-        // var service = _shopServiceRepository.Find(x => x.Id == serviceId);
-        var service = new Models.DbEntities.ShopService();
-        if (service == null)
-        {
-            throw new ApiException("Service not found") { StatusCode = (int)HttpStatusCode.NotFound };
-        }
-
-        // Verificar si hay empleados asociados al servicio
-        if (service.Employees.Any())
-        {
-            throw new ApiException("Service has employees associated with it")
-                { StatusCode = (int)HttpStatusCode.BadRequest };
-        }
-
-        // Verificar si hay pedidos asociados al servicio
-        if (service.Appointments.Any())
-        {
-            throw new ApiException("Service has orders associated with it")
-                { StatusCode = (int)HttpStatusCode.BadRequest };
-        }
-
-        // Verificar si hay pedidos asociados en la lista de espera al servicio
-        if (service.WaitLists.Any())
-        {
-            throw new ApiException("Service has wait lists associated with it")
-                { StatusCode = (int)HttpStatusCode.BadRequest };
-        }
-
-        shop.ShopServices.Remove(service);
-
-        _shopRepository.Update(shop);
-
-        // Eliminar el servicio
-        _shopServiceRepository.Delete(service);
-
-        return "Service removed successfully";
     }
 
     public string AddEmployee(Guid shopId, RegisterEmployee registerEmployee)
@@ -226,9 +169,9 @@ public class ShopService : IShopService
         };
 
         // Verificar si hay servicios para agregar
-        if (registerEmployee.Services != null && registerEmployee.Services.Any())
+        if (registerEmployee.Services != null && registerEmployee.Services.Count != 0)
         {
-            var serviceIds = registerEmployee.Services.Select(s => s.Id).ToList();
+            var serviceIds = registerEmployee.Services.ToList();
             var servicesToAdd = _shopServiceRepository.FindAll(x => serviceIds.Contains(x.Id));
 
             // Añadir los servicios encontrados, ignorando los que no existen
@@ -268,9 +211,9 @@ public class ShopService : IShopService
         employee.Status = updateEmployee.Status;
 
         // Verificar si hay servicios para agregar o actualizar
-        if (updateEmployee.Services != null && updateEmployee.Services.Any())
+        if (updateEmployee.Services != null && updateEmployee.Services.Count != 0)
         {
-            var serviceIds = updateEmployee.Services.Select(s => s.Id).ToList();
+            var serviceIds = updateEmployee.Services.ToList();
             var servicesToAdd = _shopServiceRepository.FindAll(x => serviceIds.Contains(x.Id));
             var servicesToRemove = employee.Services
                 .Where(s => serviceIds.All(id => id != s.ShopServiceId)).ToList();
@@ -360,17 +303,30 @@ public class ShopService : IShopService
             throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
         }
 
-        var socialMedia = new SocialMedia(links.Name, links.Url);
-        shop.SocialMedia.Add(socialMedia);
+        var socialMediaLinks = links.SocialMediaLinks
+            .Select(socialMediaLink => new SocialMedia(socialMediaLink.Name, socialMediaLink.Url))
+            .ToList();
+
+        shop.SocialMedia = socialMediaLinks;
 
         _shopRepository.Update(shop);
 
-        return $"{links.Name} updated successfully";
+        return "Social media links updated successfully";
     }
 
     public string UpdateShopImage(Guid shopId, UpdateShopImage image)
     {
-        throw new NotImplementedException();
+        var shop = _shopRepository.Find(x => x.Id == shopId);
+        if (shop == null)
+        {
+            throw new ApiException("Shop not found") { StatusCode = (int)HttpStatusCode.NotFound };
+        }
+
+        shop.ProfileImage = image.ImageUrl;
+
+        _shopRepository.Update(shop);
+
+        return "Shop image updated successfully";
     }
 
     public Shop UpdateOpeningHoursGuid(Guid shopId, UpdateOpeningHours updateOpeningHours)

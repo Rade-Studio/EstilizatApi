@@ -2,5 +2,5 @@
 
 public class UpdateShopImage
 {
-    
+    public string ImageUrl { get; set; }
 }

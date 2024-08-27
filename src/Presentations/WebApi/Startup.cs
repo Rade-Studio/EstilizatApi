@@ -1,7 +1,6 @@
 using Caching;
 using Core;
 using Data.Mongo;
-using GraphiQl;
 using HealthChecks.UI.Client;
 using Identity;
 using Microsoft.AspNetCore.Builder;
@@ -86,7 +85,6 @@ namespace WebApi
             app.UseHttpsRedirection();
 
             app.UseRouting();
-            app.UseGraphiQl();
             app.UseAuthentication();
             app.UseAuthorization();
 
